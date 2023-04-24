@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">anroid_gui</string>
+    <string name="app_head">Medicine Detector System</string>
+    <string name="heating_head">Heating Inspect</string>
+    <string name="motor_head">Motor Inspect</string>
+    <string name="light_head">Light Status Inspect</string>
+</resources>
