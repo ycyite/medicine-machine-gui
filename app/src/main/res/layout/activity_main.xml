@@ -36,15 +36,15 @@
             android:layout_gravity="fill" />
 
         <Button
-            android:id="@+id/button_selfdetect"
-            android:text="detect"
+            android:id="@+id/button_start"
+            android:text="start"
             android:layout_columnWeight="1"
             android:layout_gravity="fill"
             android:layout_marginRight="5dp"/>
 
         <Button
-            android:id="@+id/button_start"
-            android:text="start"
+            android:id="@+id/button_pause"
+            android:text="pause"
             android:layout_columnWeight="1"
             android:layout_gravity="fill" />
 
@@ -95,6 +95,7 @@
                 android:text=""></TextView>
         </GridLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
