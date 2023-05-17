@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                         // for ActivityCompat#requestPermissions for more details.
                         return;
                     }
-                    if (device.getName().equals("JDY31")) {
+                    if (device.getName().equals("HC-05")) {
 
                         if (startSystemThread != null) {
                             if (startSystemThread.isAlive()) {
@@ -512,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
                     speedtextHandler.sendEmptyMessage(0);
                     lighttextHandler.sendEmptyMessage(0);
                 }
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
                 break;
@@ -578,7 +578,7 @@ public class MainActivity extends AppCompatActivity {
         }
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : pairedDevices) {
-            if (device.getName().equals("JDY31")) {
+            if (device.getName().equals("HC-05")) {
                 mJDY31Device = device;
                 return;
             }
@@ -757,7 +757,7 @@ public class MainActivity extends AppCompatActivity {
         // 创建 Entry 列表
         ArrayList<Entry> entries = new ArrayList<>();
         for (int i = 0; i < data.size(); i++) {
-            entries.add(new Entry(i*10, data.get(i)));
+            entries.add(new Entry(i, data.get(i)));
         }
 
         // 创建 LineDataSet
