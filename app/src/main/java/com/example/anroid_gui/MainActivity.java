@@ -235,26 +235,20 @@ public class MainActivity extends AppCompatActivity {
                 if (startSystemThread != null && startSystemThread.isAlive()) {
                     pause_flag = true;
                 }
-
                 bluetoothtextHandler.sendEmptyMessage(1);
                 bluetoothbuttonHandler.sendEmptyMessage(1);
                 startbuttonHandler.sendEmptyMessage(0);
                 pausebuttonHandler.sendEmptyMessage(0);
-
-
                 break;
             } else if (!mBluetoothAdapter.isEnabled()) {
                 if (startSystemThread != null && startSystemThread.isAlive()) {
                     pause_flag = true;
                 }
-
                 bluetoothtextHandler.sendEmptyMessage(1);
                 bluetoothbuttonHandler.sendEmptyMessage(1);
                 AllToastHandler.sendEmptyMessage(0);
                 startbuttonHandler.sendEmptyMessage(0);
                 pausebuttonHandler.sendEmptyMessage(0);
-
-
                 break;
             }
         }
@@ -268,13 +262,6 @@ public class MainActivity extends AppCompatActivity {
                 if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
                         return;
                     }
                     if (device.getName().equals("HC-05")) {
@@ -305,8 +292,6 @@ public class MainActivity extends AppCompatActivity {
                         lighttextHandler.sendEmptyMessage(1);
                         temptextHandler.sendEmptyMessage(1);
                         speedtextHandler.sendEmptyMessage(1);
-
-                        // JDY31 module is disconnected
                     }
                 }
             }
@@ -470,6 +455,9 @@ public class MainActivity extends AppCompatActivity {
                         outputStream.write(pause_msg_bytes);
                         pausebuttonHandler.sendEmptyMessage(0);
                         startbuttonHandler.sendEmptyMessage(1);
+                        temptextHandler.sendEmptyMessage(1);
+                        speedtextHandler.sendEmptyMessage(1);
+                        lighttextHandler.sendEmptyMessage(1);
                         LineChartsHandler.sendEmptyMessage(0);
                         break;
                     }
@@ -477,10 +465,17 @@ public class MainActivity extends AppCompatActivity {
                     speedtextHandler.sendEmptyMessage(0);
                     lighttextHandler.sendEmptyMessage(0);
                 } else if (res.length == 2) {
-                    TempStr = res[0];
-                    SpeedStr = res[1];
-                    if (isFloat(TempStr)) {
-                        heat_temp_array.add(Float.parseFloat(TempStr));
+
+
+                    if (isFloat(res[0])) {
+                        TempStr = res[0];
+                        heat_temp_array.add(Float.parseFloat(res[0]));
+                    }
+                    if(isInteger(res[1])){
+                        SpeedStr = res[1];
+                        if(!res[1].equals("0")){
+                            speed_array.add(Integer.parseInt(res[1]));
+                        }
                     }
                     if (!LightStr.equals("ON")) {
                         LightStr = "OFF";
@@ -489,14 +484,14 @@ public class MainActivity extends AppCompatActivity {
                     speedtextHandler.sendEmptyMessage(0);
                     lighttextHandler.sendEmptyMessage(0);
                 } else if (res.length == 3) {
-                    TempStr = res[0];
-                    SpeedStr = res[1];
-                    if (isFloat(TempStr)) {
+                    if (isFloat(res[0])) {
+                        TempStr = res[0];
                         heat_temp_array.add(Float.parseFloat(TempStr));
                     }
 
-                    if (!SpeedStr.equals("0")) {
+                    if (!res[1].equals("0")) {
                         if (isInteger(SpeedStr)) {
+                            SpeedStr = res[1];
                             speed_array.add(Integer.parseInt(SpeedStr));
                         }
                     }
@@ -521,8 +516,6 @@ public class MainActivity extends AppCompatActivity {
                 throw new RuntimeException(e);
             }
         }
-
-
     }
 
 
@@ -566,13 +559,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void searchForJDY31() throws IOException {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_BLUETOOTH_PERMISSION);
             return;
         }
@@ -585,7 +571,6 @@ public class MainActivity extends AppCompatActivity {
         }
         mJDY31Device = null;
         socket = null;
-
     }
 
 
@@ -593,32 +578,16 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_BLUETOOTH_PERMISSION);
             }
-
             socket = mJDY31Device.createInsecureRfcommSocketToServiceRecord(JDY31_UUID);
             System.out.println(socket);
             socket.connect();
-
             Thread.sleep(1000);
             bluetoothTextView.clearComposingText();
-
             bluetoothtextHandler.sendEmptyMessage(0);
-//            Toast toast = Toast.makeText(getApplicationContext(), "The JDY31 Module is connected successfully!", Toast.LENGTH_SHORT);
-//            // Show the Toast
-//            toast.setDuration(Toast.LENGTH_SHORT);
-//            toast.show();
-            // Connection successful
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            // Connection failed
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -631,29 +600,43 @@ public class MainActivity extends AppCompatActivity {
         link_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (bluetoothCheckThread != null && bluetoothCheckThread.isAlive()) {
-                    bluetoothCheckThread.interrupt();
-                }
-                try {
-                    searchForJDY31();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                connectToJDY31();
-                startbuttonHandler.sendEmptyMessage(1);
-                bluetoothbuttonHandler.sendEmptyMessage(0);
-
-                bluetoothCheckThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        BluetoothCheck();
+                if (!mBluetoothAdapter.isEnabled()) {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
                     }
-                });
-                bluetoothCheckThread.start();
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                }else {
+                    if (bluetoothCheckThread != null && bluetoothCheckThread.isAlive()) {
+                        bluetoothCheckThread.interrupt();
+                    }
+                    try {
+                        searchForJDY31();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    connectToJDY31();
+                    startbuttonHandler.sendEmptyMessage(1);
+                    bluetoothbuttonHandler.sendEmptyMessage(0);
+
+                    bluetoothCheckThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            BluetoothCheck();
+                        }
+                    });
+                    bluetoothCheckThread.start();
 //                    bluetoothCheckThread.start();
-                // You can now send and receive data over the socket
-                // ...
+                    // You can now send and receive data over the socket
+                    // ...
+                }
             }
 
 //                Toast toast = Toast.makeText(getApplicationContext(), "Link Successfully!", Toast.LENGTH_SHORT);
@@ -711,13 +694,10 @@ public class MainActivity extends AppCompatActivity {
                     int width = Math.max(mLineChart1.getWidth(), mLineChart2.getWidth());
                     Bitmap combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                     Canvas canvas = new Canvas(combinedBitmap);
-
                     // 绘制第一个折线图
                     mLineChart2.draw(canvas);
-
                     // 将画布平移至第二个折线图的起始位置
                     canvas.translate(0, mLineChart2.getHeight());
-
                     // 绘制第二个折线图
                     mLineChart1.draw(canvas);
 
@@ -748,18 +728,14 @@ public class MainActivity extends AppCompatActivity {
         }else{
             lineChart = view.findViewById(R.id.lineChart2);
         }
-
-
         // 设置 LineChart 的属性
         lineChart.setNoDataText("No data available");
         lineChart.getDescription().setText(label);
-
         // 创建 Entry 列表
         ArrayList<Entry> entries = new ArrayList<>();
         for (int i = 0; i < data.size(); i++) {
             entries.add(new Entry(i, data.get(i)));
         }
-
         // 创建 LineDataSet
         LineDataSet dataSet = new LineDataSet(entries, label);
         if(flag==1){
@@ -768,14 +744,11 @@ public class MainActivity extends AppCompatActivity {
             dataSet.setColor(Color.GREEN);
         }
         // 设置 LineDataSet 的属性
-
         dataSet.setLineWidth(2f);
         dataSet.setDrawCircles(false);
         dataSet.setDrawValues(false);
-
         // 创建 LineData
         LineData lineData = new LineData(dataSet);
-
         // 设置 LineChart 的数据
         lineChart.setData(lineData);
         System.out.println(lineChart);
@@ -784,7 +757,6 @@ public class MainActivity extends AppCompatActivity {
     private void drawLineCharts() {
         // 创建一个临时文件来存储PDF文件
         File file = new File(getCacheDir(), "chart.pdf");
-
         try {
             // 创建PDF文档对象
             PdfDocument pdfDocument = new PdfDocument();
@@ -829,16 +801,13 @@ public class MainActivity extends AppCompatActivity {
             File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             fileName = fileName + ".png";
             File file = new File(directory, fileName);
-
             // 将Bitmap保存为图片文件
             OutputStream outputStream = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             outputStream.flush();
             outputStream.close();
-
             // 将图片添加到相册
             addImageToGallery(file.getAbsolutePath(), this);
-
             Toast.makeText(this, "图片保存成功", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "图片保存失败", Toast.LENGTH_SHORT).show();
